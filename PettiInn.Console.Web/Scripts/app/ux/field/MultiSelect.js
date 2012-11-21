@@ -14,7 +14,7 @@
                 layout: 'fit',
                 hideOnMaskTap: false,
                 width: Ext.os.is.Phone ? '14em' : '18em',
-                height: Ext.os.is.Phone ? '12.5em' : '20em',
+                height: Ext.os.is.Phone ? '10em' : '15em',
                 items: {
                     xtype: 'list',
                     mode: 'MULTI',

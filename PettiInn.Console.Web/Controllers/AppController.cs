@@ -169,7 +169,7 @@ namespace PettiInn.Console.Web.Controllers
 
             return Json(new
             {
-                success = result.Info.Extra["count"].As<int>() > 0,
+                success = result.Info.IsValid,
                 error = result.Info.Errors
             });
         }
@@ -219,41 +219,47 @@ namespace PettiInn.Console.Web.Controllers
 
         [HttpPost]
         [RequireSuperAdmin]
-        public JsonResult CreateHotel(HotelDTO dto)
+        public async Task<JsonResult> CreateHotel(HotelDTO dto)
         {
-            //var result = ConsoleService.CreateHotel(dto);
-            //return Json(new
-            //{
-            //    success = result.Info.IsValid,
-            //    error = result.Info.Errors
-            //});
-            return null;
+            var result = await this.PostAsync<HotelDTO>(this.GetAPIAddress("/api/console/Hotel/Create"), new
+                {
+                    dto = dto
+                });
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
         }
 
         [HttpPost]
         [RequireSuperAdmin]
-        public JsonResult UpdateHotel(HotelDTO dto)
+        public async Task<JsonResult> UpdateHotel(HotelDTO dto)
         {
-            //var result = ConsoleService.UpdateHotel(dto);
-            //return Json(new
-            //{
-            //    success = result.Info.IsValid,
-            //    error = result.Info.Errors
-            //});
-            return null;
+            var result = await this.PostAsync<HotelDTO>(this.GetAPIAddress("/api/console/Hotel/Update"), new
+                {
+                    dto = dto
+                });
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
         }
 
         [HttpPost]
         [RequireSuperAdmin]
-        public JsonResult DeleteHotel(HotelDTO dto)
+        public async Task<JsonResult> DeleteHotel(HotelDTO dto)
         {
-            //var result = ConsoleService.DeleteHotel(dto);
-            //return Json(new
-            //{
-            //    success = result.Info.Extra["count"].As<int>() > 0,
-            //    error = result.Info.Errors
-            //});
-            return null;
+            var result = await this.PostAsync<HotelDTO>(this.GetAPIAddress("/api/console/Hotel/Delete"), new
+                {
+                    dto = dto
+                });
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
         }
 
         [HttpPost]
@@ -275,41 +281,47 @@ namespace PettiInn.Console.Web.Controllers
 
         [HttpPost]
         [RequireSuperAdmin]
-        public JsonResult CreateRoomType(RoomTypeDTO dto)
+        public async Task<JsonResult> CreateRoomType(RoomTypeDTO dto)
         {
-            //var result = ConsoleService.CreateRoomType(dto);
-            //return Json(new
-            //{
-            //    success = result.Info.IsValid,
-            //    error = result.Info.Errors
-            //});
-            return null;
+            var result = await this.PostAsync<RoomTypeDTO>(this.GetAPIAddress("/api/console/RoomType/Create"), new
+                {
+                    dto = dto
+                });
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
         }
 
         [HttpPost]
         [RequireSuperAdmin]
-        public JsonResult UpdateRoomType(RoomTypeDTO dto)
+        public async Task<JsonResult> UpdateRoomType(RoomTypeDTO dto)
         {
-            //var result = ConsoleService.UpdateRoomType(dto);
-            //return Json(new
-            //{
-            //    success = result.Info.IsValid,
-            //    error = result.Info.Errors
-            //});
-            return null;
+            var result = await this.PostAsync<RoomTypeDTO>(this.GetAPIAddress("/api/console/RoomType/Update"), new
+                {
+                    dto = dto
+                });
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
         }
 
         [HttpPost]
         [RequireSuperAdmin]
-        public JsonResult DeleteRoomType(RoomTypeDTO dto)
+        public async Task<JsonResult> DeleteRoomType(RoomTypeDTO dto)
         {
-            //var result = ConsoleService.DeleteRoomType(dto);
-            //return Json(new
-            //{
-            //    success = result.Info.Extra["count"].As<int>() > 0,
-            //    error = result.Info.Errors
-            //});
-            return null;
+            var result = await this.PostAsync<RoomTypeDTO>(this.GetAPIAddress("/api/console/RoomType/Delete"), new
+                {
+                    dto = dto
+                });
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
         }
     }
 }

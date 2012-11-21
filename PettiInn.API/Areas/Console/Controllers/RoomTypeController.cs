@@ -39,5 +39,35 @@ namespace PettiInn.API.Areas.Console.Controllers
 
             return Json(resultDTO);
         }
+
+        [System.Web.Mvc.HttpPost]
+        public JsonResult Create(RoomTypeDTO dto)
+        {
+            var manager = this.GetManagerFor<IRoomTypeManager>();
+            var result = manager.Create(dto);
+            var resultDTO = new RoomTypeDTO(result);
+
+            return Json(resultDTO);
+        }
+
+        [System.Web.Mvc.HttpPost]
+        public JsonResult Update(RoomTypeDTO dto)
+        {
+            var manager = this.GetManagerFor<IRoomTypeManager>();
+            var result = manager.Update(dto);
+            var resultDTO = new RoomTypeDTO(result);
+
+            return Json(resultDTO);
+        }
+
+        [System.Web.Mvc.HttpPost]
+        public JsonResult Delete(RoomTypeDTO dto)
+        {
+            var manager = this.GetManagerFor<IRoomTypeManager>();
+            var result = manager.Delete(dto.Id);
+            var resultDTO = new RoomTypeDTO(result);
+
+            return Json(resultDTO);
+        }
     }
 }

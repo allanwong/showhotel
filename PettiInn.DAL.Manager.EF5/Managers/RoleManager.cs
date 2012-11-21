@@ -45,22 +45,16 @@ namespace PettiInn.DAL.Manager.EF5.Managers
             return result;
         }
 
-        //public override NHResult<Role> Delete(int id)
-        //{
-        //    var result = new NHResult<Role>();
-        //    var obj = this.GetById(id);
+        public override NHResult<Role> Delete(int id)
+        {
+            var result = new NHResult<Role>();
+            var obj = this.GetById(id);
 
-        //    if (obj != null)
-        //    {
-        //        obj.Modules.Clear();
-        //        obj.Administrators.Clear();
-        //        this.ObjectContext.DeleteObject(obj);
-        //        //this.ObjectContext.ObjectStateManager.ChangeObjectState(obj, EntityState.Deleted);//将附加的实体状态更改为删除
-        //        var count = this.ObjectContext.SaveChanges();
-        //        result.Extra.Add("count", count);
-        //    }
+            obj.Modules.Clear();
+            obj.Administrators.Clear();
+            result = base.Delete(id);
 
-        //    return result;
-        //}
+            return result;
+        }
     }
 }

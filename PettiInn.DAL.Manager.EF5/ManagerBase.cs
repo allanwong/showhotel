@@ -113,14 +113,15 @@ namespace PettiInn.DAL.Manager.EF5
             var result = new NHResult<TEntity>();
             var obj = this.GetById(id);
 
-            if (obj != null)
+            if (obj == null)
             {
-                this.ObjectContext.CreateObjectSet<TEntity>().Attach(obj);
-                this.ObjectContext.DeleteObject(obj);
-                //this.ObjectContext.ObjectStateManager.ChangeObjectState(obj, EntityState.Deleted);//将附加的实体状态更改为删除
-                var count = this.ObjectContext.SaveChanges();
-                result.Extra.Add("count", count);
+                result.Errors.Add(string.Format("数据库中不存在该实体类\"{0}\"，可能以被其他管理员删除，请刷新列表", typeof(TEntity).Name));
             }
+
+            this.ObjectContext.CreateObjectSet<TEntity>().Attach(obj);
+            this.ObjectContext.DeleteObject(obj);
+            var count = this.ObjectContext.SaveChanges();
+            result.Extra.Add("count", count);
 
             return result;
         }

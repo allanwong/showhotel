@@ -13,12 +13,67 @@ namespace PettiInn.DAL.Manager.EF5.Managers
     {
         public NHResult<Hotel> Create(HotelDTO dto)
         {
-            throw new NotImplementedException();
+            var hotel = new Hotel
+            {
+                Name = dto.Name,
+                Address = dto.Address,
+                Location = dto.Location,
+                Sort = dto.Sort
+            };
+
+            var mManager = new RoomTypeManager();
+            var roomTypes = mManager.GetByIds(dto.RoomTypes.Select(m => m.Id));
+            hotel.RoomTypes = roomTypes.ToList();
+
+            var result = base.SaveOrUpdate(hotel);
+
+            return result;
         }
 
         public NHResult<Hotel> Update(HotelDTO dto)
         {
-            throw new NotImplementedException();
+            var hotel = base.GetById(dto.Id);
+
+            hotel.Name = dto.Name;
+            hotel.Address = dto.Address;
+            hotel.Location = dto.Location;
+            hotel.Sort = dto.Sort;
+
+            var mManager = new RoomTypeManager();
+            var roomTypes = mManager.GetByIds(dto.RoomTypes.Select(m => m.Id));
+
+            hotel.RoomTypes.Clear();
+
+            foreach (var r in roomTypes)
+            {
+                hotel.RoomTypes.Add(r);
+            }
+
+            var result = base.SaveOrUpdate(hotel);
+            return result;
+        }
+
+        public override NHResult<Hotel> Delete(int id)
+        {
+            var result = new NHResult<Hotel>();
+            var hotel = base.GetById(id);
+
+            if (hotel.RoomBookings.Count > 0)
+            {
+                result.Errors.Add("该酒店已有订单，无法删除");
+            }
+
+            if (result.IsValid)
+            {
+                hotel.Prices.Clear();
+                hotel.Rooms.Clear();
+                hotel.RoomTypeImages.Clear();
+                hotel.RoomTypes.Clear();
+
+                result = base.Delete(id);
+            }
+
+            return result;
         }
     }
 }

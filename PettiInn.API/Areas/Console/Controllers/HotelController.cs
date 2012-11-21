@@ -39,5 +39,35 @@ namespace PettiInn.API.Areas.Console.Controllers
 
             return Json(resultDTO);
         }
+
+        [System.Web.Mvc.HttpPost]
+        public JsonResult Create(HotelDTO dto)
+        {
+            var manager = this.GetManagerFor<IHotelManager>();
+            var result = manager.Create(dto);
+            var resultDTO = new HotelDTO(result);
+
+            return Json(resultDTO);
+        }
+
+        [System.Web.Mvc.HttpPost]
+        public JsonResult Update(HotelDTO dto)
+        {
+            var manager = this.GetManagerFor<IHotelManager>();
+            var result = manager.Update(dto);
+            var resultDTO = new HotelDTO(result);
+
+            return Json(resultDTO);
+        }
+
+        [System.Web.Mvc.HttpPost]
+        public JsonResult Delete(HotelDTO dto)
+        {
+            var manager = this.GetManagerFor<IHotelManager>();
+            var result = manager.Delete(dto.Id);
+            var resultDTO = new HotelDTO(result);
+
+            return Json(resultDTO);
+        }
     }
 }

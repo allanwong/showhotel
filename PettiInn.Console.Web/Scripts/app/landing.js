@@ -79,7 +79,7 @@ Ext.application({
         return [
             {
                 xtype: 'fieldset',
-                title: '喜乐酒店管理控制台',
+                title: '尚豪系列酒店管理控制台',
                 defaults: {
                     required: true,
                     labelAlign: 'left',
