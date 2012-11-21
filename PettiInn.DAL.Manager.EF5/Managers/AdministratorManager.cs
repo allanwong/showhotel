@@ -1,0 +1,176 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data.Common;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using PettiInn.DAL.Entities.EF5;
+using PettiInn.DAL.Manager.Core.Managers;
+using PettiInn.SOA.DTO;
+using PettiInn.Utilities;
+
+namespace PettiInn.DAL.Manager.EF5.Managers
+{
+    internal class AdministratorManager : ManagerBase<Administrator>, IAdministratorManager
+    {
+
+        public NHResult<Administrator> Create(AdministratorDTO dto)
+        {
+            return base.Transact((DbTransaction trans) =>
+                {
+                    var result = new NHResult<Administrator>();
+
+                    if (!this.IsUserNameUnique(dto.UserName))
+                    {
+                        result.Errors.Add(string.Format("用户名\"{0}\"已存在", dto.UserName));
+                    }
+
+                    if (result.IsValid)
+                    {
+                        var salt = Security.GenerateSalt();
+                        var hashPassword = Security.HashPassword(dto.Password, salt);
+
+                        var admin = new Administrator
+                        {
+                            UserName = dto.UserName,
+                            Password = hashPassword,
+                            Name = dto.Name,
+                            IsSuper = dto.IsSuper,
+                            Mobile = dto.Mobile
+                        };
+                        var mManager = new RoleManager();
+                        var roles = mManager.GetByIds(dto.Roles.Select(m => m.Id));
+                        admin.Roles = roles.ToList();
+
+                        result = base.SaveOrUpdate(admin);
+                    }
+
+                    return result;
+                });
+        }
+
+        public NHResult<Administrator> Authenticate(string userName, string password)
+        {
+            var result = new NHResult<Administrator>();
+
+            var admin = this.GetByUserName(userName);
+
+            if (admin != null)
+            {
+                var passwordValid = Security.ValidatePassword(admin.Password, password);
+
+                if (passwordValid)
+                {
+                    result.Entity = admin;
+                }
+                else
+                {
+                    result.Errors.Add("该用户名或密码错误！");
+                }
+            }
+            else
+            {
+                result.Errors.Add("该用户名不存在，请查证！");
+            }
+
+            return result;
+        }
+
+        public NHResult<Administrator> MarkLogin(int adminId)
+        {
+            var admin = base.GetById(adminId);
+            admin.LastLoggedIn = DateTime.Now;
+
+            var result = base.SaveOrUpdate(admin);
+
+            return result;
+        }
+
+        public NHResult<Administrator> Update(AdministratorDTO dto)
+        {
+            var result = new NHResult<Administrator>();
+
+            if (!this.IsUserNameUnique(dto.UserName, dto.Id))
+            {
+                result.Errors.Add(string.Format("用户名\"{0}\"已存在", dto.UserName));
+            }
+
+            if (result.IsValid)
+            {
+                var admin = base.GetById(dto.Id);
+
+                admin.UserName = dto.UserName;
+                admin.Name = dto.Name;
+                admin.IsSuper = dto.IsSuper;
+                admin.Mobile = dto.Mobile;
+
+                var mManager = new RoleManager();
+                var roles = mManager.GetByIds(dto.Roles.Select(m => m.Id));
+                admin.Roles.Clear();
+                foreach(var role in roles)
+                {
+                    admin.Roles.Add(role);
+                }
+
+                result = base.SaveOrUpdate(admin);
+            }
+
+            return result;
+        }
+
+        public NHResult<Administrator> UpdatePassword(AdministratorDTO dto)
+        {
+            var result = new NHResult<Administrator>();
+
+            var admin = base.GetById(dto.Id);
+            var salt = Security.GenerateSalt();
+            var hashPassword = Security.HashPassword(dto.Password, salt);
+
+            admin.Password = hashPassword;
+
+            result = base.SaveOrUpdate(admin);
+
+            return result;
+        }
+
+        public NHResult<Administrator> UpdateMyPassword(AdministratorDTO dto, string oldPassword)
+        {
+            var result = new NHResult<Administrator>();
+
+            var admin = base.GetById(dto.Id);
+            var valid = this.Authenticate(admin.UserName, oldPassword).IsValid;
+
+            if (!valid)
+            {
+                result.Errors.Add("当前密码不正确");
+            }
+            else
+            {
+                var salt = Security.GenerateSalt();
+                var hashPassword = Security.HashPassword(dto.Password, salt);
+
+                admin.Password = hashPassword;
+
+                result = base.SaveOrUpdate(admin);
+            }
+
+            return result;
+        }
+
+        public Administrator GetByUserName(string userName)
+        {
+            var admin = base.Query().FirstOrDefault(a => a.UserName.Equals(userName, StringComparison.OrdinalIgnoreCase));
+            
+            return admin;
+        }
+
+        public bool IsUserNameUnique(string userName, int? editingId = null)
+        {
+            var user = this.GetByUserName(userName);
+
+            var unique = user == null || (editingId != null && editingId.Value == user.Id);
+
+            return unique;
+        }
+    }
+}

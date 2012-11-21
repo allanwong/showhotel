@@ -1,0 +1,19 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>登录 - @System.Configuration.ConfigurationManager.AppSettings["AppName"]</title>
+    <script type="text/javascript">
+        var capctha = '@Url.Action("CaptchaLogin", "home")';
+    </script>
+    @Url.CombresLink("siteCss")
+    @Url.CombresLink("framework")
+    @Url.CombresLink("index")
+</head>
+<body>
+</body>
+</html>

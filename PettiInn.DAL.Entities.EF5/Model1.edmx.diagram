@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="0e0155504db44d70be0c4cb3f7f0df68" Name="关系图1" DisplayType="true">
+        <EntityTypeShape EntityType="PettiInnModel.Administrator" Width="1.5" PointX="8.25" PointY="6" IsExpanded="true" />
+        <EntityTypeShape EntityType="PettiInnModel.Agent" Width="1.5" PointX="8.25" PointY="14.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="PettiInnModel.Hotel" Width="1.5" PointX="0.75" PointY="6.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="PettiInnModel.Module" Width="1.5" PointX="0.75" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="PettiInnModel.Price" Width="1.5" PointX="5.25" PointY="10.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="PettiInnModel.Role" Width="1.5" PointX="10.5" PointY="4" IsExpanded="true" />
+        <EntityTypeShape EntityType="PettiInnModel.Room" Width="1.5" PointX="8.25" PointY="10" IsExpanded="true" />
+        <EntityTypeShape EntityType="PettiInnModel.RoomBooking" Width="1.5" PointX="10.5" PointY="7.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="PettiInnModel.RoomBookingCancel" Width="1.5" PointX="12.75" PointY="8.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="PettiInnModel.RoomType" Width="1.5" PointX="3" PointY="13.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="PettiInnModel.RoomTypeImage" Width="1.5" PointX="5.25" PointY="14.25" IsExpanded="true" />
+        <AssociationConnector Association="PettiInnModel.FK_RoomBooking_Administrator" ManuallyRouted="false" />
+        <AssociationConnector Association="PettiInnModel.FK_RoomBooking_Agent" ManuallyRouted="false" />
+        <AssociationConnector Association="PettiInnModel.FK_Price_Hotel" ManuallyRouted="false" />
+        <AssociationConnector Association="PettiInnModel.FK_Room_Hotel" ManuallyRouted="false" />
+        <AssociationConnector Association="PettiInnModel.FK_RoomBooking_Hotel" ManuallyRouted="false" />
+        <AssociationConnector Association="PettiInnModel.FK_RoomTypeImage_Hotel" ManuallyRouted="false" />
+        <AssociationConnector Association="PettiInnModel.FK_Module_Module" ManuallyRouted="false" />
+        <AssociationConnector Association="PettiInnModel.FK_Price_RoomType" ManuallyRouted="false" />
+        <AssociationConnector Association="PettiInnModel.FK_Room_RoomType" ManuallyRouted="false" />
+        <AssociationConnector Association="PettiInnModel.FK_RoomBooking_Room" ManuallyRouted="false" />
+        <AssociationConnector Association="PettiInnModel.FK_RoomTypeImage_RoomType" ManuallyRouted="false" />
+        <AssociationConnector Association="PettiInnModel.Administrator_Role" ManuallyRouted="false" />
+        <AssociationConnector Association="PettiInnModel.Hotel_RoomType" ManuallyRouted="false" />
+        <AssociationConnector Association="PettiInnModel.Role_Module" ManuallyRouted="false" />
+        <AssociationConnector Association="PettiInnModel.FK_RoomBookingCancel_RoomBooking1" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

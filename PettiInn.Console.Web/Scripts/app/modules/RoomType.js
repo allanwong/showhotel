@@ -1,0 +1,322 @@
+﻿Ext.define("app.modules.RoomType",
+{
+    requires: [
+        'app.models.RoomTypeModel',
+        'Ext.ux.touch.grid.List',
+        'Ext.ux.touch.grid.feature.Feature',
+        'Ext.ux.touch.grid.feature.Sorter'
+    ],
+    constructor: function (args) {
+        this.callParent(arguments);
+
+        var store = Ext.create('Ext.data.Store', {
+            model: 'app.models.RoomTypeModel',
+            autoLoad: true,
+            proxy: {
+                type: 'ajax',
+                url: '/app/RoomTypes',
+                actionMethods: { create: "POST", read: "POST", update: "POST", destroy: "POST" },
+                reader: {
+                    type: 'json'
+                }
+            }
+        });
+
+        var grid = Ext.create('Ext.ux.touch.grid.List', {
+            itemId: "roomtypes_grid",
+            store: store,
+
+            features: [
+                {
+                    ftype: 'Ext.ux.touch.grid.feature.Sorter',
+                    launchFn: 'initialize'
+                }
+            ],
+            columns: [
+                {
+                    header: '名称',
+                    dataIndex: 'Name',
+                    width: "50%",
+                    style: 'padding-left: 1em;',
+                    filter: { type: 'string' }
+                },
+                {
+                    header: '排序',
+                    dataIndex: 'Sort',
+                    width: "50%",
+                    style: 'padding-left: 1em;',
+                    filter: { type: 'int' }
+                }
+            ],
+            listeners:
+            {
+                selectionchange: function (view, records, eOpts) {
+                    var btn_edit = Ext.Viewport.down("#t_top").down("#btn_edit");
+                    btn_edit.setDisabled(!records.length);
+
+                    var btn_delete = Ext.Viewport.down("#t_top").down("#btn_delete");
+                    btn_delete.setDisabled(!records.length);
+                }
+            }
+        });
+
+        Ext.Viewport.add(grid);
+        this.buildToolbar();
+    },
+
+    btn_addHandler: function (btn) {
+        var role_add = Ext.Viewport.down("#roomtype_add");
+
+        if (!role_add) {
+            var overlay = Ext.Viewport.add({
+                xtype: 'app.modules.RoomType.Add',
+                itemId: "roomtype_add"
+            });
+        }
+    },
+
+    btn_editHandler: function (btn) {
+        var selections = Ext.Viewport.down("#roomtypes_grid").getSelection(),
+                    role_add = Ext.Viewport.down("#roomtype_add"),
+                    id = selections[0].get("Id");
+
+        if (!role_add) {
+            var overlay = Ext.Viewport.add({
+                xtype: 'app.modules.RoomType.Add',
+                itemId: "roomtype_add",
+                eId: id
+            });
+        }
+    },
+
+    buildToolbar: function () {
+        var btn_add =
+        {
+            iconCls: "add",
+            handler: this.btn_addHandler
+        };
+
+        var btn_edit =
+        {
+            iconCls: "compose",
+            itemId: "btn_edit",
+            disabled: true,
+            handler: this.btn_editHandler
+        };
+
+        var btn_delete =
+        {
+            itemId: "btn_delete",
+            iconCls: "delete",
+            disabled: true,
+            handler: function (btn) {
+                util.ask("删除", "您确定要删除该房型吗？<div style=\"color:red\">警告：删除房型会将属于该房型的所有房间和预订全部删除！</div>", function () {
+                    var grid = Ext.Viewport.down("#roomtypes_grid"),
+                        selections = grid.getSelection(),
+                        id = selections[0].get("Id");
+
+                    grid.setMasked({
+                        xtype: 'loadmask',
+                        message: '请稍候...'
+                    });
+
+                    Ext.Ajax.request({
+                        url: '/app/DeleteRoomType',
+                        jsonData: {
+                            Id: id
+                        },
+                        scope: this,
+                        success: function (response) {
+                            var data = Ext.decode(response.responseText);
+
+                            if (data.success) {
+                                grid.getStore().load();
+                            }
+                            else {
+                                util.err("错误", data.error);
+                            }
+
+                            grid.setMasked(false);
+                        }
+                    });
+                });
+            }
+        };
+
+        var btn_refresh =
+        {
+            iconCls: "refresh",
+            handler: function (btn) {
+                var grid = Ext.Viewport.down("#roomtypes_grid");
+                grid.getStore().load();
+            }
+        };
+
+        Ext.Viewport.down("#t_top").insert(0, btn_delete);
+        Ext.Viewport.down("#t_top").insert(0, btn_refresh);
+        Ext.Viewport.down("#t_top").insert(0, btn_edit);
+        Ext.Viewport.down("#t_top").insert(0, btn_add);
+    },
+    destroy: function () {
+        var roomtype_add = Ext.Viewport.down("#roomtype_add");
+
+        if (roomtype_add) {
+            roomtype_add.destroy();
+        }
+    }
+});
+
+Ext.define("app.modules.RoomType.Add",
+{
+    extend: "Ext.Panel",
+    id: "pnlRoomtypeAdd",
+    xtype: "app.modules.RoomType.Add",
+    config: {
+        modal: true,
+        centered: true,
+        hideOnMaskTap: true,
+        layout: "fit",
+        width: Ext.os.deviceType == 'Phone' ? "90%" : 400,
+        height: Ext.os.deviceType == 'Phone' ? '100%' : 250,
+        scrollable: true,
+
+        items: [
+            {
+                xtype: "formpanel",
+                listeners:
+                {
+                    painted: function (comp, opts) {
+                        var panel = Ext.getCmp("pnlRoomtypeAdd"),
+                            form = panel.down("formpanel");
+
+                        if (panel.config.eId) {
+                            form.setMasked({
+                                xtype: 'loadmask',
+                                message: '请稍候...'
+                            });
+
+                            Ext.Ajax.request({
+                                url: '/app/GetRoomType',
+                                jsonData: {
+                                    roomTypeId: panel.config.eId
+                                },
+                                scope: this,
+                                success: function (response) {
+                                    var data = Ext.decode(response.responseText);
+                                    form.setValues(data);
+
+                                    if (Ext.isArray(data.Modules)) {
+                                        var modules = Ext.Array.map(data.Modules, function (item) {
+                                            return item.Id;
+                                        });
+                                    }
+
+                                    form.setMasked(false);
+                                }
+                            });
+
+                            form.setUrl("/app/UpdateRoomType");
+                        }
+                        else {
+                            form.setUrl("/app/CreateRoomType");
+                        }
+                    }
+                },
+                items: [
+                    {
+                        xtype: "fieldset",
+                        defaultType: "textfield",
+                        defaults: {
+                            labelAlign: 'left',
+                            autoComplete: false,
+                            labelWidth: '40%'
+                        },
+                        title: "房型信息",
+                        items: [
+                        {
+                            name: 'Name',
+                            required: true,
+                            label: '房型名称'
+                        },
+                        {
+                            name: "Sort",
+                            xtype: "numberfield",
+                            value: 10,
+                            minValue: 0,
+                            label: "排序"
+                        }]
+                    }
+                ]
+            },
+            {
+                docked: 'bottom',
+                xtype: 'toolbar',
+                defaultTypes: "button",
+                layout: {
+                    pack: 'center',
+                    align: 'center'
+                },
+                items: [
+                    {
+                        text: "提交",
+                        ui: "confirm",
+                        handler: function (btn) {
+                            var form = btn.up("panel").down("formpanel"),
+                                eId = btn.up("panel").config.eId,
+                                values = form.getValues(),
+                                model = Ext.create('app.models.RoomTypeModel', Ext.apply(values, { Id: eId })),
+                                errors = model.validate();
+
+                            if (!errors.isValid()) {
+                                util.err("错误", errors);
+                            }
+                            else {
+                                form.setMasked({
+                                    xtype: 'loadmask',
+                                    message: '请稍候...'
+                                });
+
+                                Ext.apply(values, { Id: eId });
+                                Ext.Ajax.request(
+                                {
+                                    url: form.getUrl(),
+                                    method: "post",
+                                    jsonData: values,
+                                    success: function (response, opts) {
+                                        var obj = Ext.decode(response.responseText);
+                                        form.setMasked(false);
+                                        if (obj.success) {
+                                            var roomtypes_grid = Ext.Viewport.down("#roomtypes_grid");
+
+                                            if (roomtypes_grid) {
+                                                roomtypes_grid.getStore().load();
+                                            }
+
+                                            btn.up("panel").destroy();
+                                        }
+                                        else {
+                                            util.err("错误", obj.error);
+                                        }
+                                    }
+                                });
+                            };
+                        }
+                    },
+                    {
+                        text: "重置",
+                        handler: function (btn) {
+                            btn.up("panel").down("formpanel").reset();
+                        }
+                    },
+                    {
+                        text: "取消",
+                        ui: "decline",
+                        handler: function (btn) {
+                            btn.up("panel").destroy();
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+});
