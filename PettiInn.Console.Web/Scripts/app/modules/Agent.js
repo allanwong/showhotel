@@ -1,0 +1,370 @@
+﻿Ext.define("app.modules.Agent",
+    {
+        requires: [
+        'app.models.AgentModel',
+        'Ext.ux.touch.grid.List',
+        'Ext.ux.touch.grid.feature.Feature',
+        'Ext.ux.touch.grid.feature.Sorter',
+        'app.models.AgentTypeModel'
+        ],
+        constructor: function (args) {
+            this.callParent(arguments);
+
+            var store = Ext.create('Ext.data.Store', {
+                model: 'app.models.AgentModel',
+                autoLoad: true,
+                proxy: {
+                    type: 'ajax',
+                    url: '/app/Agents',
+                    actionMethods: { create: "POST", read: "POST", update: "POST", destroy: "POST" },
+                    reader: {
+                        type: 'json'
+                    }
+                }
+            });
+
+            var grid = Ext.create('Ext.ux.touch.grid.List', {
+                itemId: "agents_grid",
+                store: store,
+
+                features: [
+                    {
+                        ftype: 'Ext.ux.touch.grid.feature.Sorter',
+                        launchFn: 'initialize'
+                    }
+                ],
+                columns: [
+                    {
+                        header: '中介名称',
+                        dataIndex: 'Name',
+                        width: '20%',
+                        style: 'text-align: center;',
+                        filter: { type: 'string' }
+                    },
+                    {
+                        header: '类型',
+                        dataIndex: 'AgentType',
+                        width: '20%',
+                        style: 'text-align: center;',
+                        filter: { type: 'string' }
+                    },
+                    {
+                        header: '优先级',
+                        dataIndex: 'Priority',
+                        width: '10%',
+                        style: 'text-align: center;',
+                        filter: { type: 'int' }
+                    },
+                    {
+                        header: '地址',
+                        dataIndex: 'Address',
+                        style: 'text-align: center;',
+                        width: '30%',
+                        filter: { type: 'string' }
+                    },
+                    {
+                        header: '备注',
+                        dataIndex: 'Comment',
+                        width: '20%',
+                        style: 'text-align: center;',
+                        filter: { type: 'string' }
+                    }
+                ],
+                listeners:
+                {
+                    selectionchange: function (view, records, eOpts) {
+                        var btn_edit = Ext.Viewport.down("#t_top").down("#btn_edit");
+                        btn_edit.setDisabled(!records.length);
+
+                        var btn_delete = Ext.Viewport.down("#t_top").down("#btn_delete");
+                        btn_delete.setDisabled(!records.length);
+                    }
+                }
+            });
+
+            Ext.Viewport.add(grid);
+            this.buildToolbar();
+        },
+
+        btn_addHandler: function (btn) {
+            var role_add = Ext.Viewport.down("#agent_add");
+
+            if (!role_add) {
+                var overlay = Ext.Viewport.add({
+                    xtype: 'app.modules.Agent.Add',
+                    itemId: "agent_add"
+                });
+            }
+        },
+
+        buildToolbar: function () {
+            var btn_add =
+            {
+                text: "添加",
+                handler: this.btn_addHandler
+            };
+
+            var btn_edit =
+            {
+                itemId: "btn_edit",
+                text: "编辑",
+                disabled: true,
+                handler: function (btn) {
+                    var selections = Ext.Viewport.down("#agents_grid").getSelection(),
+                        role_add = Ext.Viewport.down("#agent_add"),
+                        id = selections[0].get("Id");
+
+                    if (!role_add) {
+                        var overlay = Ext.Viewport.add({
+                            xtype: 'app.modules.Agent.Add',
+                            itemId: "agent_add",
+                            eId: id
+                        });
+                    }
+                }
+            };
+
+            var btn_delete =
+            {
+                itemId: "btn_delete",
+                text: "删除",
+                disabled: true,
+                handler: function (btn) {
+                    util.ask("删除", "您确定要删除该房间吗？", function () {
+                        var grid = Ext.Viewport.down("#agents_grid"),
+                            selections = grid.getSelection(),
+                            id = selections[0].get("Id");
+
+                        grid.setMasked({
+                            xtype: 'loadmask',
+                            message: '请稍候...'
+                        });
+
+                        Ext.Ajax.request({
+                            url: '/app/DeleteAgent',
+                            jsonData: {
+                                Id: id
+                            },
+                            scope: this,
+                            success: function (response) {
+                                var data = Ext.decode(response.responseText);
+
+                                if (data.success) {
+                                    grid.getStore().load();
+                                }
+                                else {
+                                    util.err("错误", data.error);
+                                }
+
+                                grid.setMasked(false);
+                            }
+                        });
+                    });
+                }
+            };
+
+            var btn_refresh =
+            {
+                text: "刷新",
+                handler: function (btn) {
+                    var grid = Ext.Viewport.down("#agents_grid");
+                    grid.getStore().load();
+                }
+            };
+
+            Ext.Viewport.down("#moduleActions").insert(0, btn_delete);
+            Ext.Viewport.down("#moduleActions").insert(0, btn_refresh);
+            Ext.Viewport.down("#moduleActions").insert(0, btn_edit);
+            Ext.Viewport.down("#moduleActions").insert(0, btn_add);
+        },
+        destroy: function () {
+            var agent_add = Ext.Viewport.down("#agent_add");
+
+            if (agent_add) {
+                agent_add.destroy();
+            }
+        }
+    });
+
+Ext.define("app.modules.Agent.Add",
+    {
+        extend: "Ext.Panel",
+        id: "pnlAgentAdd",
+        xtype: "app.modules.Agent.Add",
+        config: {
+            modal: true,
+            centered: true,
+            hideOnMaskTap: false,
+            layout: "fit",
+            width: Ext.os.deviceType == 'Phone' ? "100%" : 400,
+            height: Ext.os.deviceType == 'Phone' ? "100%" : 400,
+            scrollable: true,
+
+            items: [
+                {
+                    xtype: "formpanel",
+                    listeners:
+                    {
+                        painted: function (comp, opts) {
+                            var panel = Ext.getCmp("pnlAgentAdd"),
+                                form = panel.down("formpanel");
+
+                            if (panel.config.eId) {
+                                form.setMasked({
+                                    xtype: 'loadmask',
+                                    message: '请稍候...'
+                                });
+                                Ext.Ajax.request({
+                                    url: '/app/GetAgent',
+                                    jsonData: {
+                                        roomId: panel.config.eId
+                                    },
+                                    scope: this,
+                                    success: function (response) {
+                                        var data = Ext.decode(response.responseText);
+                                        form.data = data;
+                                        form.setValues(data);
+                                        form.setMasked(false);
+                                    }
+                                });
+
+                                //form.setUrl("/app/UpdateRoom");
+                            }
+                            else {
+                                //form.setUrl("/app/CreateRoom");
+                            }
+                        }
+                    },
+                    items: [
+                        {
+                            xtype: "fieldset",
+                            defaultType: "textfield",
+                            defaults: {
+                                required: true,
+                                labelAlign: 'left',
+                                autoComplete: false,
+                                labelWidth: '40%'
+                            },
+                            title: "添加中介",
+                            items: [
+                                {
+                                    id: "Name",
+                                    name: 'Name',
+                                    label: '房间名称'
+                                },
+                                {
+                                    xtype: "selectfield",
+                                    itemId: "agentTypes",
+                                    name: "TypeId",
+                                    displayField: 'Name',
+                                    valueField: 'Id',
+                                    label: '类型',
+                                    store: {
+                                        autoLoad: true,
+                                        proxy: {
+                                            type: 'ajax',
+                                            model: "app.models.AgentTypeModel",
+                                            url: '/app/AgentTypes',
+                                            actionMethods: { create: "POST", read: "POST", update: "POST", destroy: "POST" },
+                                            reader: {
+                                                type: 'json'
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    id: "Priority",
+                                    name: 'Priority',
+                                    xtype: "numberfield",
+                                    value: 10,
+                                    minValue: 0,
+                                    label: '优先级'
+                                },
+                                {
+                                    name: "Address",
+                                    xtype: "textareafield",
+                                    label: "办公地址"
+                                },
+                                {
+                                    name: "Comment",
+                                    xtype: "textareafield",
+                                    label: "备注"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    docked: 'bottom',
+                    xtype: 'toolbar',
+                    defaultTypes: "button",
+                    layout: {
+                        pack: 'center',
+                        align: 'center'
+                    },
+                    items: [
+                        {
+                            text: "提交",
+                            ui: "confirm",
+                            handler: function (btn) {
+                                var form = btn.up("panel").down("formpanel"),
+                                    eId = btn.up("panel").config.eId,
+                                    values = form.getValues(),
+                                    model = Ext.create('app.models.AgentModel', Ext.apply(values, { Id: eId })),
+                                    errors = model.validate(),
+                                    msg = '';
+
+                                if (!errors.isValid()) {
+                                    util.err("错误", errors);
+                                }
+                                else {
+                                    form.setMasked({
+                                        xtype: 'loadmask',
+                                        message: '请稍候...'
+                                    });
+
+                                    Ext.apply(values, { Id: eId });
+
+                                    Ext.Ajax.request(
+                                    {
+                                        url: form.getUrl(),
+                                        method: "post",
+                                        jsonData: values,
+                                        success: function (response, opts) {
+                                            var obj = Ext.decode(response.responseText);
+                                            form.setMasked(false);
+                                            if (obj.success) {
+                                                var rooms_grid = Ext.Viewport.down("#agents_grid");
+
+                                                if (rooms_grid) {
+                                                    rooms_grid.getStore().load();
+                                                }
+
+                                                btn.up("panel").destroy();
+                                            }
+                                            else {
+                                                util.err("错误", obj.error);
+                                            }
+                                        }
+                                    });
+                                };
+                            }
+                        },
+                        {
+                            text: "重置",
+                            handler: function (btn) {
+                                btn.up("panel").down("formpanel").reset();
+                            }
+                        },
+                        {
+                            text: "取消",
+                            ui: "decline",
+                            handler: function (btn) {
+                                btn.up("panel").destroy();
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    });

@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<repositories>
+  <repository path="..\EntityTest\packages.config" />
+  <repository path="..\PettiInn.API\packages.config" />
+  <repository path="..\PettiInn.Console.Web\packages.config" />
+  <repository path="..\PettiInn.DAL.Entities.EF5\packages.config" />
+  <repository path="..\PettiInn.SOA\packages.config" />
+</repositories>
