@@ -218,7 +218,6 @@ Ext.define("app.modules.RoomBooking.Add",
                                             value: { hours: 12, minutes: 0 },
                                             itemId: 'timeStart',
                                             picker: {
-                                                zIndex: 100,
                                                 hoursTitle: "时",
                                                 minutesTitle: "分",
                                                 increment: 15
@@ -246,7 +245,6 @@ Ext.define("app.modules.RoomBooking.Add",
                                             value: { hours: 12, minutes: 0 },
                                             itemId: 'timeEnd',
                                             picker: {
-                                                zIndex: 100,
                                                 hoursTitle: "时",
                                                 minutesTitle: "分",
                                                 increment: 15
