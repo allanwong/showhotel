@@ -1,0 +1,215 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.Common;
+using System.Data.Entity;
+using System.Data.Objects;
+using System.Linq;
+using System.Linq.Dynamic;
+using System.Text;
+using System.Threading.Tasks;
+using PettiInn.DAL.Entities.EF5;
+using PettiInn.DAL.Manager.Core;
+using PettiInn.Utilities;
+
+namespace PettiInn.DAL.Manager.EF5
+{
+    internal abstract class ManagerBase<TEntity> : IManagerBase<TEntity> where TEntity : EntityBase
+    {
+        private bool _disposed = false;
+
+        public PettiInn.DAL.Entities.EF5.Entities DBContext
+        {
+            get
+            {
+                return ObjectContextFactory.GetCurrentObjectContext() as PettiInn.DAL.Entities.EF5.Entities;
+            }
+        }
+
+        ~ManagerBase()
+        {
+            Dispose(true);
+        }
+
+        public DbTransaction BeginTransaction()
+        {
+            this.DBContext.ObjectContext.Connection.Open();
+            var trans = this.DBContext.ObjectContext.Connection.BeginTransaction();
+
+            return trans;
+        }
+
+        public DbTransaction CommitTransaction(DbTransaction trans)
+        {
+            if (trans != null)
+            {
+                try
+                {
+                    trans.Commit();
+                }
+                catch (Exception ex)
+                {
+                    trans.Rollback();
+                    throw ex;
+                }
+                finally
+                {
+                    if (this.DBContext != null && this.DBContext.ObjectContext.Connection.State != ConnectionState.Closed)
+                    {
+                        this.DBContext.ObjectContext.Connection.Close();
+                    }
+                }
+            }
+
+            return trans;
+        }
+
+        public DbTransaction RollbackTransaction(DbTransaction trans)
+        {
+            if (trans != null)
+            {
+                trans.Rollback();
+            }
+
+            return trans;
+        }
+
+        internal abstract DbSet<TEntity> DBSet
+        {
+            get;
+        }
+
+        public IQueryable<TEntity> Query()
+        {
+            return this.DBSet;
+        }
+
+        public virtual IQueryable<TEntity> GetAll(bool tracking = false)
+        {
+            var query = this.Query();
+
+            if (!tracking)
+            {
+                query = query.AsNoTracking();
+            }
+
+            if (typeof(ISort).IsAssignableFrom(typeof(TEntity)))
+            {
+                query = query.OrderBy("Sort");
+            }
+
+            return query;
+        }
+
+        public TEntity GetById(int Id)
+        {
+            return this.DBContext.ObjectContext.CreateObjectSet<TEntity>().FirstOrDefault(t => t.Id == Id);
+        }
+
+        public virtual IQueryable<TEntity> GetByIds(IEnumerable<int> Ids)
+        {
+            var results = new List<TEntity>().AsQueryable();
+
+            if (Ids != null && Ids.Count() > 0)
+            {
+                var query = this.GetAll();
+                results = query.Where(t => Ids.Contains(t.Id));
+            }
+
+            return results;
+        }
+
+        public virtual NHResult<TEntity> Delete(int id)
+        {
+            var result = new NHResult<TEntity>();
+            var obj = this.GetById(id);
+
+            if (obj == null)
+            {
+                result.Errors.Add(string.Format("数据库中不存在该实体类\"{0}\"，可能以被其他管理员删除，请刷新列表", typeof(TEntity).Name));
+            }
+
+            this.DBContext.ObjectContext.CreateObjectSet<TEntity>().Attach(obj);
+            this.DBContext.ObjectContext.DeleteObject(obj);
+            var count = this.DBContext.SaveChanges();
+            result.Extra.Add("count", count);
+
+            return result;
+        }
+
+        public void Dispose()
+        {
+            Dispose(false);
+        }
+
+        private void Dispose(bool finalizing)
+        {
+            if (!_disposed)
+            {
+                if (!finalizing)
+                    GC.SuppressFinalize(this);
+
+                _disposed = true;
+            }
+        }
+
+        #region 事物
+        public NHResult<TEntity> SaveOrUpdate(TEntity entity)
+        {
+            var result = new NHResult<TEntity>();
+
+            result = this.Validate(entity);
+            result.Entity = entity;
+
+            if (result.IsValid)
+            {
+                //SaveChanges会自动Commit Transaction,失败时也会自动回滚
+                if (entity.IsNew())
+                {
+                    if (typeof(ICreatedOn).IsAssignableFrom(typeof(TEntity)))
+                    {
+                        ((ICreatedOn)entity).CreatedOn = DateTime.Now;
+                    }
+                    this.DBContext.ObjectContext.CreateObjectSet<TEntity>().AddObject(entity);
+                }
+                this.DBContext.SaveChanges();
+            }
+
+            return result;
+        }
+
+        protected TResult Transact<TResult>(Func<DbTransaction, TResult> action)
+        {
+            var trans = this.BeginTransaction();
+
+            try
+            {
+                var result = action.Invoke(trans);
+                this.CommitTransaction(trans);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                this.RollbackTransaction(trans);
+                throw ex;
+            }
+        }
+
+        public NHResult<TEntity> Validate(TEntity entity)
+        {
+            var result = new NHResult<TEntity>();
+
+            //var validator = ValidationFactory.CreateValidatorFromConfiguration<TEntity>(this.Helper.ValidationConfigurationSource);
+            //var results = validator.Validate(entity);
+
+            //if (!results.IsValid)
+            //{
+            //    var rs = from r in results select r.Message;
+            //    result.Errors.AddRange(rs);
+            //}
+
+            return result;
+        }
+        #endregion
+    }
+}

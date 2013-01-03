@@ -1,0 +1,26 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using PettiInn.DAL.Manager.Core.Managers;
+using PettiInn.SOA.DTO;
+using PettiInn.Utilities;
+
+namespace PettiInn.API.Areas.Services.Controllers
+{
+    public class BookingsController : ControllerBase
+    {
+        [HttpPost]
+        public JsonResult Availabilities(int? hotelId, IEnumerable<int> roomTypeIds, DateTime? start, DateTime? end, DateTime? startTime, DateTime? endTime, IEnumerable<Query> queries)
+        {
+            var startDT = start.MergeTime(startTime);
+            var endDT = end.MergeTime(endTime);
+            var manager = this.GetManagerFor<IRoomBookingManager>();
+            var results = manager.Search(hotelId, roomTypeIds, startDT, endDT).ToList();
+            var resultDTOs = results.Select(t => new RoomBookingDTO(queries, t));
+
+            return Json(resultDTOs);
+        }
+    }
+}
