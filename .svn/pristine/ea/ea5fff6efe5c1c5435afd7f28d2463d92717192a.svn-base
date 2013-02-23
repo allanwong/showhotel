@@ -1,0 +1,42 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace PettiInn.SOA.DTO.Shared
+{
+    public class SearchCriterias
+    {
+        public class Sort
+        {
+            public string dir { get; set; }
+
+            public string sort { get; set; }
+        }
+
+        private int _page = 1;
+
+        public int page
+        {
+            get { return _page; }
+            set { _page = value; }
+        }
+
+        private int _rows = 10;
+
+        public int rows
+        {
+            get { return _rows; }
+            set { _rows = value; }
+        }
+
+        private IEnumerable<Sort> _Sorts = new List<Sort>();
+
+        public IEnumerable<Sort> Sorts
+        {
+            get { return _Sorts; }
+            set { _Sorts = value; }
+        }
+    }
+}

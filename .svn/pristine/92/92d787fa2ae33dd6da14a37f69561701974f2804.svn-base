@@ -1,0 +1,37 @@
+﻿$(function () {
+    //==datatable defaults==//
+    $.extend($.fn.dataTable.defaults, {
+        bJQueryUI: true,
+        //"bProcessing": true,
+        sPaginationType: "full_numbers",
+        bServerSide: true,
+        sServerMethod: "POST",
+        fnDrawCallback: function () {
+            var that = this;
+            this.closest(".dataTables_wrapper").find("select").select2();
+            this.$('tbody tr')
+                .bind('mouseenter', function () { $(this).addClass("datatablerowhighlight"); })
+                .bind('mouseleave', function () { $(this).removeClass("datatablerowhighlight"); })
+                .on("click", function () {
+                    $(this).toggleClass("checked");
+                    that.trigger("rowClicked", [this, that]);
+                });
+        }
+    });
+
+    $.fn.dataTableExt.oApi.fntoggleSelectAll = function (oSettings) {
+        var nodes = this.fnGetNodes();
+        $(nodes).trigger("click");
+
+        return nodes;
+    }
+
+    $.fn.dataTableExt.oApi.fngetSelectedNodes = function (oSettings) {
+        var nodes = this.fnGetNodes();
+        var selected = _.chain(nodes).filter(function (item) {
+            return $(item).hasClass("checked");
+        }).value();
+
+        return selected;
+    }
+});

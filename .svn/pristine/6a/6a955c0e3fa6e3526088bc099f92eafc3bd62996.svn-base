@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{6CACDD6B-2415-48F8-861E-306313495535}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PettiInn.SOA.DTO</RootNamespace>
+    <AssemblyName>PettiInn.SOA.DTO</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Fasterflect">
+      <HintPath>..\packages\fasterflect.2.1.0\lib\net40\Fasterflect.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AdministratorDTO.cs" />
+    <Compile Include="AgentDTO.cs" />
+    <Compile Include="AgentTypeDTO.cs" />
+    <Compile Include="AvailabilityResultDTO.cs" />
+    <Compile Include="CurrencyUnitDTO.cs" />
+    <Compile Include="DTOBase.cs" />
+    <Compile Include="HotelDTO.cs" />
+    <Compile Include="ModuleDTO.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Query.cs" />
+    <Compile Include="RoleDTO.cs" />
+    <Compile Include="RoomBookingCancelDTO.cs" />
+    <Compile Include="RoomBookingDTO.cs" />
+    <Compile Include="RoomDTO.cs" />
+    <Compile Include="RoomTypeDTO.cs" />
+    <Compile Include="Shared\PagingResult.cs" />
+    <Compile Include="Shared\SearchCriterias.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PettiInn.DAL.Entities.EF5\PettiInn.DAL.Entities.EF5.csproj">
+      <Project>{375e9479-e455-4cf5-a626-c704be6a2621}</Project>
+      <Name>PettiInn.DAL.Entities.EF5</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PettiInn.Utilities\PettiInn.Utilities.csproj">
+      <Project>{F35C0D7D-2310-40EB-A7CD-BAAB11647FCE}</Project>
+      <Name>PettiInn.Utilities</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

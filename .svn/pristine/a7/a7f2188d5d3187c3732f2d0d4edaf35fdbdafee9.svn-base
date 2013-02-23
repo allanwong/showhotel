@@ -1,0 +1,24 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@*@section head{
+    <title>
+        @System.Configuration.ConfigurationManager.AppSettings["AppName"]
+    </title>
+}
+
+@section headJS{
+    @Url.CombresLink("app")
+}*@
+
+@section head{
+    <title>
+        @System.Configuration.ConfigurationManager.AppSettings["AppName"]
+    </title>
+
+}
+
+@section headJS{
+    @Url.CombresLink("app")
+}

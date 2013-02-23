@@ -1,0 +1,96 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@*@section head{
+    <title>
+        @System.Configuration.ConfigurationManager.AppSettings["AppName"]
+    </title>
+}
+
+@section headJS{
+    @Url.CombresLink("app")
+}*@
+
+@model IndexModel
+@section head{
+    <title>
+        @System.Configuration.ConfigurationManager.AppSettings["AppName"]
+    </title>
+}
+
+@section headJS{
+    @Url.CombresLink("app")
+}
+
+<div id="header">
+	<h1>
+        @Html.ActionLink(System.Configuration.ConfigurationManager.AppSettings["AppName"], "index", "app")
+	</h1>		
+</div>
+		
+<div id="search">
+	<input type="text" placeholder="Search here...">
+    <button type="submit" class="tip-right" data-original-title="Search">
+        <i class="icon-search icon-white"></i>
+    </button>
+</div>
+<div id="user-nav" class="navbar navbar-inverse">
+    <ul class="nav btn-group" style="width: auto; margin: 0px;">
+        <li class="btn btn-inverse"><a title="" href="#"><i class="icon icon-user"></i> <span class="text">Profile</span></a></li>
+        <li class="btn btn-inverse dropdown" id="menu-messages"><a href="#" data-toggle="dropdown" data-target="#menu-messages" class="dropdown-toggle"><i class="icon icon-envelope"></i> <span class="text">Messages</span> <span class="label label-important">5</span> <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a class="sAdd" title="" href="#">new message</a></li>
+                <li><a class="sInbox" title="" href="#">inbox</a></li>
+                <li><a class="sOutbox" title="" href="#">outbox</a></li>
+                <li><a class="sTrash" title="" href="#">trash</a></li>
+            </ul>
+        </li>
+        <li class="btn btn-inverse"><a title="" href="#"><i class="icon icon-cog"></i> <span class="text">Settings</span></a></li>
+        <li class="btn btn-inverse">
+            <a id="btn-logout" title="退出" href="javascript:void(0);" data-href="@Url.Action("logout", "app")">
+                <i class="icon icon-share-alt"></i>
+                <span class="text">退出</span>
+            </a>
+        </li>
+    </ul>
+</div>
+            
+<div id="sidebar">
+	<ul style="display: block;">
+        @foreach (var module in this.Model.Modules)
+        {
+            if (module.Children.Count <= 0)
+            {
+                <li>
+                    <a href="javascript:void(0);" data-url="@module.Class">
+                        <i class="icon @module.CSS"></i>
+                        <span>@module.Name</span>
+                    </a>
+                </li>
+            }
+            else
+            {
+                <li class="submenu">
+			        <a href="javascript:void(0);">
+                        <i class="icon @module.CSS"></i>
+                        <span>@module.Name</span>
+                        <span class="label">@module.Children.Count</span>
+			        </a>
+			        <ul>
+                        @foreach(var child in module.Children)
+                        {
+                            <li>
+                                <a href="javascript:void(0);" data-url="@child.Class">@child.Name</a>
+                            </li>
+                        }
+			        </ul>
+		        </li>
+            }
+        }
+	</ul>
+</div>
+
+<div id="content">
+
+</div>

@@ -1,0 +1,83 @@
+﻿@{
+    Layout = "~/Views/Shared/_ContentLayout.cshtml";
+}
+
+@model RoleAddEditModel
+
+@section head
+{
+    @Url.CombresLink("uiCss")
+    @Url.CombresLink("form")
+    @Url.CombresLink("rolesAddEdit")
+}
+
+@section breadcrumb{
+    <a class="tip-bottom" href="javascript:void(0);">
+        <i class="icon-user"></i>
+        权限
+    </a>
+    <a class="current" href="javascript:void(0);">
+        @ViewBag.Title
+    </a>
+}
+
+<div class="container-fluid">
+	<div class="row-fluid">
+		<div class="span12">
+			<div class="widget-box">
+				<div class="widget-title">
+					<span class="icon">
+						<i class="icon-align-justify"></i>									
+					</span>
+					<h5>
+                        @this.ViewBag.Title
+					</h5>
+				</div>
+				<div class="widget-content nopadding">
+                    @using (Html.BeginForm("addedit", "roles", FormMethod.Post, new { id="formRoleAddedit", novalidate = "novalidate", @class="form-horizontal" }))
+                    {
+                        <div class="control-group">
+                            @Html.LabelFor(m => m.Name, "角色名称*", new { @class="control-label" })
+                            <div class="controls">
+                                @Html.TextBoxFor(m => m.Name)
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label tip-top" title="请在树形控件中勾选赋予该角色的权限">权限*</label>
+                            <div class="controls">
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <div class="divModulesTree">
+                                                    <ul class="module-tree"></ul> 
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div style="margin-left:5px;">
+                                                    <a href="javascript:void(0)" class="btn btn tree-cbAll" style="*margin-left:5px;">
+                                                        全选
+                                                    </a>
+                                                    <br />
+                                                    <a href="javascript:void(0)" class="btn btn tree-cbNone" style="margin-top:5px;">
+                                                        全不选
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <input type="submit" value="提交" class="btn btn-primary">
+                            <input type="reset" value="重置" class="btn btn">
+                        </div>
+                        @Html.HiddenFor(m => m.Id)
+                        @Html.Hidden("mids", JsonConvert.SerializeObject(this.Model.ModuleIds), new { @class = "mids" })
+                    }
+				</div>
+			</div>			
+		</div>
+	</div>
+</div>

@@ -1,0 +1,13 @@
+widget
+mouse
+Position
+Draggable
+Droppable
+Resizable(plugins:alsoResize,containment,animate,ghost,grid)
+Selectable
+Sortable
+Autocomplete
+Menu
+Button
+Slider
+Progressbar

@@ -1,0 +1,56 @@
+﻿@{
+    ViewBag.Title = "角色管理";
+    Layout = "~/Views/Shared/_ContentLayout.cshtml";
+}
+
+@section head{
+    @Url.CombresLink("roles")
+}
+
+@section breadcrumb{
+    <a class="tip-bottom" href="javascript:void(0);">
+        <i class="icon-user"></i>
+        权限
+    </a>
+    <a class="current" href="javascript:void(0);">
+        @ViewBag.Title
+    </a>
+}
+
+<div class="container-fluid">
+    <div class="widget-box">
+        <div class="widget-title">
+		    <h5>角色列表</h5>
+            <div class="widget-actions pull-left">
+                <div class="btn-group">
+                    <button class="btn btnRefresh">
+                        <i class="icon-refresh"></i>
+                        刷新
+                    </button>
+                    <button class="btn btnSelAll">
+                        <i class="icon-th-list"></i>
+                        全选/反选
+                    </button>
+                    <button class="btn btnAdd">
+                        <i class="icon-plus"></i>
+                        添加
+                    </button>
+                    <button class="btn btnEdit" disabled="disabled">
+                        <i class="icon-edit"></i>
+                        编辑
+                    </button>
+                    <button class="btn btnDel" disabled="disabled">
+                        <i class="icon-remove-sign"></i>
+                        删除
+                    </button>
+                </div>
+            </div>
+	    </div>
+
+        <div class="widget-content nopadding">
+            <table id="tblRoles" class="table table-bordered data-table">
+
+            </table>
+        </div>
+    </div>
+</div>

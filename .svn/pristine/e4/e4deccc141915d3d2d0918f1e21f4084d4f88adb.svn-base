@@ -1,0 +1,96 @@
+﻿$(function () {
+    if ($.browser.msie == true && $.browser.version.slice(0, 3) < 10) {
+        $('input[placeholder]').each(function () {
+
+            var input = $(this);
+
+            $(input).val(input.attr('placeholder'));
+
+            $(input).focus(function () {
+                if (input.val() == input.attr('placeholder')) {
+                    input.val('');
+                }
+            });
+
+            $(input).blur(function () {
+                if (input.val() == '' || input.val() == input.attr('placeholder')) {
+                    input.val(input.attr('placeholder'));
+                }
+            });
+        });
+    }
+
+    var cookie_login_user = "'cookie.login.user'";
+    var cookieUser = $.cookie(cookie_login_user);
+    if (cookieUser && cookieUser.length) {
+        $("#RememberMe").attr("checked", "checked");
+        $("#UserName").val(cookieUser).keyup();
+    };
+
+    $("#aCaptcha").click(function () {
+        var $captchaImg = $("#imgCaptcha");
+        var src = $captchaImg.attr('src') + '?';
+        $captchaImg.attr('src', src);
+        $("#Captcha").val("");
+
+        setTimeout(function () {
+            $("#Captcha").focus();
+        }, 500);
+
+        return false;
+    });
+
+    function errorPlacement(error, element) {
+        var errText = $(error).html(),
+            err = $($.format("<span class='help-inline'>{0}</span>", errText));
+
+        element.closest(".control-group").addClass("error");
+    }
+
+    function successPlacement(element, errorClass) {
+        $(element).closest(".control-group").removeClass("error");
+    }
+
+    $("#formLogin").validate(
+        {
+            errorPlacement: errorPlacement,
+            unhighlight: successPlacement,
+            messages:
+                {
+                    UserName:
+                        {
+                            required: "请输入登录邮箱"
+                        },
+                    Password:
+                        {
+                            required: "请输入登录密码"
+                        },
+                    Captcha:
+                        {
+                            required: "请输入验证码"
+                        }
+                },
+            submitHandler: function (form) {
+                $(form).ajaxSubmit(
+                {
+                    dataType: "json",
+                    beforeSubmit: function (formData, $form, options) {
+                        
+                    },
+
+                    success: function (responseText, statusText, xhr, element) {
+                        if (responseText.success) {
+                            if ($("#RememberMe").is(":checked")) {
+                                $.cookie(cookie_login_user, $("#UserName").val());
+                            }
+                            else {
+                                $.cookie(cookie_login_user, null);
+                            }
+                        } else {
+                            
+                        }
+                    }
+                });
+            }
+        });
+});

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<combres xmlns='urn:combres'>
+    <filters>
+        <filter type="Combres.Filters.FixUrlsInCssFilter, Combres" />
+    </filters>
+
+    <cssMinifiers>
+        <minifier name="yui" type="Combres.Minifiers.YuiCssMinifier, Combres">
+            <param name="CssCompressionType" type="string" value="StockYuiCompressor" />
+            <param name="ColumnWidth" type="int" value="-1" />
+        </minifier>
+        <minifier name="msajax" type="Combres.Minifiers.MSAjaxCssMinifier, Combres">
+            <param name="OutputMode" type="string" value="SingleLine" />
+            <param name="MinifyExpressions" type="bool" value="true" />
+        </minifier>
+    </cssMinifiers>
+
+    <jsMinifiers>
+        <minifier name="msajax" type="Combres.Minifiers.MSAjaxJSMinifier, Combres" binderType="Combres.Binders.SimpleObjectBinder, Combres">
+            <param name="CollapseToLiteral" type="bool" value="true" />
+            <param name="EvalsAreSafe" type="bool" value="true" />
+            <param name="MacSafariQuirks" type="bool" value="true" />
+            <param name="CatchAsLocal" type="bool" value="true" />
+            <param name="LocalRenaming" type="string" value="CrunchAll" />
+            <param name="OutputMode" type="string" value="SingleLine" />
+            <param name="RemoveUnneededCode" type="bool" value="false" />
+            <param name="StripDebugStatements" type="bool" value="true" />
+        </minifier>
+
+        <minifier name="yui" type="Combres.Minifiers.YuiJSMinifier, Combres">
+            <param name="IsVerboseLogging" type="bool" value="false" />
+            <param name="IsObfuscateJavascript" type="bool" value="true" />
+            <param name="PreserveAllSemicolons" type="bool" value="false" />
+            <param name="DisableOptimizations" type="bool" value="false" />
+            <param name="LineBreakPosition" type="int" value="-1" />
+        </minifier>
+    </jsMinifiers>
+
+    <resourceSets url="~/assets.axd"
+                defaultDuration="30"
+                defaultVersion="auto"
+                defaultDebugEnabled="auto"
+                defaultIgnorePipelineWhenDebug="false"
+                localChangeMonitorInterval="30"
+                remoteChangeMonitorInterval="60"
+                defaultCompressionEnabled="true"
+                >
+        <resourceSet name="siteCss" type="css">
+            <resource path="http://webfiles.a0.1000statics.com/libs/bootstrap/2.2.2/css/bootstrap.min.css" mode="dynamic"/>
+            <resource path="http://webfiles.a0.1000statics.com/libs/bootstrap/2.2.2/css/bootstrap-responsive.min.css" mode="dynamic"/>
+            <resource path="http://webfiles.a0.1000statics.com/libs/artDialog/5.0.1/skins/idialog.css" mode="dynamic"/>
+            <resource path="~/content/Site.css" />
+          <resource path="~/content/css/unicorn.main.css" />
+          <resource path="~/content/css/unicorn.grey.css" />
+            <!--<resource path="~/content/sencha/css/sencha-touch.css" />
+            <resource path="~/content/ux/css/Ext.ux.grid.View.css" />-->
+        </resourceSet>
+
+        <resourceSet name="loginCss" type="css">
+            <resource path="~/content/unicorn.login.css" />
+        </resourceSet>
+
+        <resourceSet name="framework" type="js">
+            <!--<resource path="~/scripts/sencha/sencha-touch-all.js" />
+            <resource path="~/scripts/sencha/ext-lang-cn.js" />
+            <resource path="~/scripts/app/util.js" />
+            <resource path="~/scripts/app/ux/FTypes.js" />
+            <resource path="~/scripts/app/ux/field/ToggleBool.js" />-->
+            <resource path="http://webfiles.a0.1000statics.com/libs/jquery/1.9.0/jquery.min.js" mode="dynamic"/>
+            <resource path="http://webfiles.a0.1000statics.com/libs/bootstrap/2.2.2/js/bootstrap.min.js" mode="dynamic"/>
+            <resource path="http://webfiles.a0.1000statics.com/libs/artDialog/5.0.1/jquery.artDialog.min.js" mode="dynamic"/>
+            <resource path="http://webfiles.a0.1000statics.com/libs/artDialog/5.0.1/artDialog.plugins.min.js" mode="dynamic"/>
+            <resource path="~/scripts/app/util.js" />
+        </resourceSet>
+
+        <resourceSet name="form" type="js">
+            <resource path="http://webfiles.a0.1000statics.com/libs/jquery.validate/1.10/jquery.validate.min.js" mode="dynamic"/>
+            <resource path="http://webfiles.a0.1000statics.com/libs/jquery.validate/1.10/additional-methods.min.js" mode="dynamic"/>
+            <resource path="http://webfiles.a0.1000statics.com/libs/jquery.form/3.21/jquery.form.js" mode="dynamic"/>
+        </resourceSet>
+
+        <resourceSet name="index" type="js">
+            <!--<resource path="~/scripts/app/landing.js" />
+            <resource path="~/scripts/app/models/LoginModel.js" />-->
+            <resource path="http://webfiles.a0.1000statics.com/libs/jquery.cookie/jquery.cookie-1.1.js" mode="dynamic"/>
+            <resource path="~/scripts/app/unicorn.login.js" />
+        </resourceSet>
+
+        <resourceSet name="app" type="js">
+            <!--<resource path="~/scripts/app/models/ModuleModel.js" />
+            <resource path="~/scripts/app/ux/validations.js" />
+            <resource path="~/scripts/app/app.js" />
+            <resource path="~/scripts/app/ux/grid/list.js" />-->
+            <resource path="http://webfiles.a0.1000statics.com/libs/jquery/1.8.3/jquery-1.8.3.min.js" mode="dynamic"/>
+            <resource path="http://webfiles.a0.1000statics.com/libs/bootstrap/2.2.2/js/bootstrap.min.js" mode="dynamic"/>
+            <resource path="~/scripts/app/pages/index.cshtml.js" />
+        </resourceSet>
+    </resourceSets>
+</combres>

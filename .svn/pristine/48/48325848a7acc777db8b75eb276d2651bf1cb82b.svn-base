@@ -1,0 +1,81 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+@model LoginModel
+<html>
+<head>
+    <title>登录 - @System.Configuration.ConfigurationManager.AppSettings["AppName"]</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script type="text/javascript">
+        var capctha = '@Url.Action("CaptchaLogin", "home")';
+    </script>
+    @Url.CombresLink("siteCss")
+    @Url.CombresLink("loginCss")
+</head>
+<body>
+    <div id="logo">
+        尚豪酒店 - 管理员后台
+    </div>
+    <div id="loginbox">
+        @using (Html.BeginForm("login", "home", FormMethod.Post, new { id = "formLogin", @class = "form-vertical", maxlength = 50 }))
+        {
+            <p>
+                请输入用户名和密码
+            </p>
+            <div class="control-group">
+                <div class="controls">
+                    <div class="input-prepend">
+                        <span class="add-on"><i class="icon-user"></i></span>
+                        @Html.TextBoxFor(m => m.UserName, new { placeholder = "登录帐号", @class = "required", maxlength = 16 })
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="controls">
+                    <div class="input-prepend">
+                        <span class="add-on"><i class="icon-lock"></i></span>
+                        @Html.PasswordFor(m => m.Password, new { placeholder = "登录密码", @class = "required", maxlength = 5 })
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="controls controls-row">
+                    <img id="imgCaptcha" src="@Url.Action("CaptchaLogin", "home")" alt="验证码..." class="captcha"/>
+                    <a id="aCaptcha" href="#" class="btn">换一张</a>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="controls controls-row">
+                    <div class="input-prepend">
+                        <span class="add-on"><i class="icon-check"></i></span>
+                        @Html.TextBoxFor(m => m.Captcha, new { placeholder = "验证码", @class = "required" })
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <div class="controls" style="display: inline-block;">
+                    <label class="checkbox" style="display: initial;">
+                      @Html.CheckBoxFor(m => m.RememberMe)
+                      记住我的登录帐号
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <span class="pull-right">
+                    <input type="submit" class="btn btn-inverse" value="登录">
+                    <input type="reset" class="btn btn-primary" value="重置">
+                </span>
+            </div>
+        }
+    </div>
+    @Url.CombresLink("framework")
+    @Url.CombresLink("form")
+    @Url.CombresLink("index")
+</body>
+</html>

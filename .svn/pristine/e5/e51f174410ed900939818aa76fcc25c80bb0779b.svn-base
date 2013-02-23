@@ -1,0 +1,626 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Security;
+using PettiInn.SOA.DTO;
+using PettiInn.Console.Web.Filters;
+using PettiInn.Utilities;
+using System.Threading.Tasks;
+using PettiInn.StringEnum;
+using PettiInn.DAL.Entities.EF5.enums;
+using PettiInn.Console.Web.Models;
+
+namespace PettiInn.Console.Web.Controllers
+{
+    public class AppController : ControllerBase
+    {
+        public async Task<ActionResult> Index()
+        {
+            var admin = await this.GetAdministrator();
+
+            var modules = await this.PostAsync<IEnumerable<ModuleDTO>>(this.GetAPIAddress("/api/console/module/GetModules"), new
+            {
+                adminId = admin.Id
+            });
+
+            var modulesInline = modules.Where(m => m.ParentId == null).OrderBy(m => m.Sort).Select(m => new ModuleDTO
+                {
+                    Id = m.Id,
+                    CSS = m.CSS,
+                    ParentId = m.ParentId,
+                    Name = m.Name,
+                    Class = m.Class,
+                    Children = modules.Where(s => s.ParentId == m.Id).OrderBy(s => s.Sort).Select(s => new ModuleDTO
+                    {
+                        Id = s.Id,
+                        CSS = s.CSS,
+                        ParentId = s.ParentId,
+                        Name = s.Name,
+                        Class = s.Class
+                    }).ToList()
+                });
+
+            var model = new IndexModel
+            {
+                Modules = modulesInline
+            };
+
+            return View(model);
+        }
+
+        public ActionResult Logout()
+        {
+            FormsAuthentication.SignOut();
+            this.Session.Clear();
+            this.Session.Abandon();
+
+            return RedirectToAction("index", "home");
+        }
+
+        //[HttpPost]
+        //public async Task<JsonResult> GetRootModules()
+        //{
+        //    var admin = await this.GetAdministrator();
+
+        //    var result = await this.PostAsync<IEnumerable<ModuleDTO>>(this.GetAPIAddress("/api/console/module/GetRootModules"), new
+        //        {
+        //            adminId = admin.Id
+        //        });
+        //    return Json(result);
+        //}
+
+        [HttpPost]
+        public async Task<JsonResult> GetAdminModules()
+        {
+            var admin = await this.GetAdministrator();
+
+            var result = await this.PostAsync<IEnumerable<ModuleDTO>>(this.GetAPIAddress("/api/console/module/GetModules"), new
+            {
+                adminId = admin.Id
+            });
+            return Json(result);
+        }
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> GetAdministrators()
+        {
+            var result = await this.PostAsync<IEnumerable<AdministratorDTO>>(this.GetAPIAddress("/api/console/Administrator/GetAdministrators"));
+
+            return Json(result);
+        }
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> GetAdministrator(int adminId)
+        {
+            var result = await this.PostAsync<AdministratorDTO>(this.GetAPIAddress("/api/console/Administrator/GetAdministrator"), new
+                {
+                    adminId = adminId,
+                    query = new string[] { "Roles" }
+                });
+            return Json(result);
+        }
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> CreateAdministrator(AdministratorDTO dto)
+        {
+            var result = await this.PostAsync<AdministratorDTO>(this.GetAPIAddress("/api/console/Administrator/CreateAdministrator"), dto);
+
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
+        }
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> UpdateAdministrator(AdministratorDTO dto)
+        {
+            var result = await this.PostAsync<AdministratorDTO>(this.GetAPIAddress("/api/console/Administrator/UpdateAdministrator"), dto);
+
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
+        }
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> UpdatePassword(AdministratorDTO dto)
+        {
+            var result = await this.PostAsync<AdministratorDTO>(this.GetAPIAddress("/api/console/Administrator/UpdatePassword"), dto);
+
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
+        }
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> UpdateMyPassword(AdministratorDTO dto, string OldPassword)
+        {
+            var user = await this.GetAdministrator();
+            dto.Id = user.Id;
+
+            var result = await this.PostAsync<AdministratorDTO>(this.GetAPIAddress("/api/console/Administrator/UpdateMyPassword"), new
+                {
+                    dto = dto,
+                    oldPassword = OldPassword
+                });
+
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
+        }
+
+        //[HttpPost]
+        //[RequireSuperAdmin]
+        //public async Task<JsonResult> Roles()
+        //{
+        //    var result = await this.PostAsync <IEnumerable<RoleDTO>>(this.GetAPIAddress("/api/console/Role/Roles"));
+        //    return Json(result);
+        //}
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> CreateRole(RoleDTO dto)
+        {
+            var result = await this.PostAsync<RoleDTO>(this.GetAPIAddress("/api/console/Role/Create"), new
+                {
+                    dto = dto
+                });
+
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
+        }
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> UpdateRole(RoleDTO dto)
+        {
+            var result = await this.PostAsync<RoleDTO>(this.GetAPIAddress("/api/console/Role/Update"), new
+                {
+                    dto = dto
+                });
+
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
+        }
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> DeleteRole(RoleDTO dto)
+        {
+            var result = await this.PostAsync<RoleDTO>(this.GetAPIAddress("/api/console/Role/DeleteRole"), new
+                {
+                    dto = dto
+                });
+
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
+        }
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> GetRole(int roleId)
+        {
+            var result = await this.PostAsync<RoleDTO>(this.GetAPIAddress("/api/console/Role/GetRole"), new
+                {
+                    id = roleId,
+                    query = new string[] { "Modules" }
+                });
+            return Json(result);
+        }
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> Modules()
+        {
+            var result = await this.PostAsync <IEnumerable<ModuleDTO>>(this.GetAPIAddress("/api/console/Module/GetModules"));
+            var modules = result.Select(m => new
+                {
+                    Id = m.Id,
+                    Name = m.Name
+                });
+            return Json(result);
+        }
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> Hotels()
+        {
+            var result = await this.PostAsync < IEnumerable<HotelDTO>>(this.GetAPIAddress("/api/console/Hotel/Hotels"));
+            return Json(result);
+        }
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> GetHotel(int hotelId)
+        {
+            var result = await this.PostAsync<HotelDTO>(this.GetAPIAddress("/api/console/Hotel/GetHotel"), new
+                {
+                    id = hotelId,
+                    query = new string[] { "RoomTypes" }
+                });
+            return Json(result);
+        }
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> CreateHotel(HotelDTO dto)
+        {
+            var result = await this.PostAsync<HotelDTO>(this.GetAPIAddress("/api/console/Hotel/Create"), new
+                {
+                    dto = dto
+                });
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
+        }
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> UpdateHotel(HotelDTO dto)
+        {
+            var result = await this.PostAsync<HotelDTO>(this.GetAPIAddress("/api/console/Hotel/Update"), new
+                {
+                    dto = dto
+                });
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
+        }
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> DeleteHotel(HotelDTO dto)
+        {
+            var result = await this.PostAsync<HotelDTO>(this.GetAPIAddress("/api/console/Hotel/Delete"), new
+                {
+                    dto = dto
+                });
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> RoomTypes(int? hotelId)
+        {
+            var result = await this.PostAsync<IEnumerable<RoomTypeDTO>>(this.GetAPIAddress("/api/console/RoomType/RoomTypes"), new
+                {
+                    hotelId = hotelId
+                });
+            return Json(result);
+        }
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> GetRoomType(int roomTypeId)
+        {
+            var result = await this.PostAsync<RoomTypeDTO>(this.GetAPIAddress("/api/console/RoomType/GetRoomType"), new
+                {
+                    id = roomTypeId
+                });
+            return Json(result);
+        }
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> CreateRoomType(RoomTypeDTO dto)
+        {
+            var result = await this.PostAsync<RoomTypeDTO>(this.GetAPIAddress("/api/console/RoomType/Create"), new
+                {
+                    dto = dto
+                });
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
+        }
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> UpdateRoomType(RoomTypeDTO dto)
+        {
+            var result = await this.PostAsync<RoomTypeDTO>(this.GetAPIAddress("/api/console/RoomType/Update"), new
+                {
+                    dto = dto
+                });
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
+        }
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> DeleteRoomType(RoomTypeDTO dto)
+        {
+            var result = await this.PostAsync<RoomTypeDTO>(this.GetAPIAddress("/api/console/RoomType/Delete"), new
+                {
+                    dto = dto
+                });
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> Rooms()
+        {
+            var result = await this.PostAsync<IEnumerable<RoomDTO>>(this.GetAPIAddress("/api/console/Room/Rooms"), new
+                {
+                    queries = new Query[] { new Query { Name = "RoomType" }, new Query { Name = "Hotel" } }
+                });
+            return Json(result.Select(r => new
+                {
+                    Id = r.Id,
+                    Name = r.Name,
+                    Sort = r.Sort,
+                    Size = r.Size,
+                    HasWindow = r.HasWindow,
+                    RoomType = r.RoomType.Name,
+                    Hotel = r.Hotel.Name
+                }));
+        }
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> DeleteRoom(RoomDTO dto)
+        {
+            var result = await this.PostAsync<RoomDTO>(this.GetAPIAddress("/api/console/Room/Delete"), new
+            {
+                dto = dto
+            });
+
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
+        }
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> CreateRoom(RoomDTO dto)
+        {
+            var result = await this.PostAsync<RoomDTO>(this.GetAPIAddress("/api/console/Room/Create"), new
+            {
+                dto = dto
+            });
+
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
+        }
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> UpdateRoom(RoomDTO dto)
+        {
+            var result = await this.PostAsync<RoomDTO>(this.GetAPIAddress("/api/console/Room/Update"), new
+            {
+                dto = dto
+            });
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
+        }
+
+        [HttpPost]
+        [RequireSuperAdmin]
+        public async Task<JsonResult> GetRoom(int roomId)
+        {
+            var result = await this.PostAsync<RoomDTO>(this.GetAPIAddress("/api/console/Room/Get"), new
+            {
+                id = roomId
+            });
+            return Json(result);
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> AgentTypes()
+        {
+            var result = await this.PostAsync<IEnumerable<AgentTypeDTO>>(this.GetAPIAddress("/api/console/AgentType/List"));
+            return Json(result.Select(r => new
+            {
+                Id = r.Id,
+                Name = r.Name
+            }));
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> Agents()
+        {
+            var result = await this.PostAsync<IEnumerable<AgentDTO>>(this.GetAPIAddress("/api/console/Agent/List"), new
+            {
+                queries = new Query[] { new Query { Name = "AgentType" } }
+            });
+            return Json(result.Select(r => new
+            {
+                Id = r.Id,
+                Name = r.Name,
+                Priority = r.Priority,
+                Comment = r.Comment,
+                Address = r.Address,
+                CreatedOn = r.CreatedOn,
+                AgentType = r.AgentType.Name
+            }));
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> AgentsSimple()
+        {
+            var result = await this.PostAsync<IEnumerable<AgentDTO>>(this.GetAPIAddress("/api/console/Agent/List"), new
+            {
+                queries = new Query[] { new Query { Name = "AgentType" } }
+            });
+            return Json(result.Select(r => new
+            {
+                Id = r.Id,
+                Name = string.Format("{0}({1})", r.Name, r.AgentType.Name)
+            }));
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> DeleteAgent(AgentDTO dto)
+        {
+            var result = await this.PostAsync<AgentDTO>(this.GetAPIAddress("/api/console/Agent/Delete"), new
+            {
+                dto = dto
+            });
+
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> CreateAgent(AgentDTO dto)
+        {
+            var result = await this.PostAsync<AgentDTO>(this.GetAPIAddress("/api/console/Agent/Create"), new
+            {
+                dto = dto
+            });
+
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> UpdateAgent(AgentDTO dto)
+        {
+            var result = await this.PostAsync<AgentDTO>(this.GetAPIAddress("/api/console/Agent/Update"), new
+            {
+                dto = dto
+            });
+            return Json(new
+            {
+                success = result.Info.IsValid,
+                error = result.Info.Errors
+            });
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> GetAgent(int id)
+        {
+            var result = await this.PostAsync<AgentDTO>(this.GetAPIAddress("/api/console/Agent/GetAgent"), new
+            {
+                id = id,
+                query = new string[] { "AgentType" }
+            });
+            return Json(result);
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> HotelsSimple()
+        {
+            var result = await this.PostAsync<IEnumerable<HotelDTO>>(this.GetAPIAddress("/api/console/Hotel/Hotels"));
+            return Json(result.Select(h => new
+                {
+                    Id = h.Id,
+                    Name = h.Name
+                }));
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> RoomsSimple(int? hotelId)
+        {
+            var result = await this.PostAsync<IEnumerable<RoomDTO>>(this.GetAPIAddress("/api/console/Room/Rooms"), new
+            {
+                queries = new Query[] { new Query { Name = "RoomType" }},
+                hotelId = hotelId
+            });
+            return Json(result.Select(r => new
+            {
+                Id = r.Id,
+                Name = string.Format("{0}({1})", r.Name, r.RoomType.Name)
+            }));
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> CurrencyUnitsSimple()
+        {
+            var result = await this.PostAsync<IEnumerable<CurrencyUnitDTO>>(this.GetAPIAddress("/api/console/CurrencyUnits/CurrencyUnits"));
+            return Json(result.Select(r => new
+            {
+                Id = r.Id,
+                Name = r.Name
+            }));
+        }
+
+        [HttpPost]
+        public JsonResult BookingStatuses()
+        {
+            var statues = StringEnumHelper.ToDictionaryNameValue<RoomBookingStatus>(); 
+            return Json(statues.Select(s => new
+                {
+                    Name = s.Key,
+                    Value = s.Value
+                }));
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> RoomBookingAvailability(int hotelId, int roomTypeId, DateTime start, DateTime end, DateTime startTime, DateTime endTime)
+        {
+            var result = await this.PostAsync<AvailabilityResultDTO>(this.GetAPIAddress("/api/Services/Bookings/Availabilities"),
+                new
+                {
+                    queries = new Query[] { new Query { Name = "Room" } },
+                    hotelId = hotelId,
+                    roomTypeIds = new int[] { roomTypeId },
+                    start = start,
+                    end = end,
+                    startTime = startTime,
+                    endTime = endTime
+                });
+            return Json(result);
+        }
+
+        [HttpPost]
+        public JsonResult RoomBookingAddEdit(int? id, int roomId, int hotelId, decimal price, int currencyUnitId, int? agentId, DateTime start, DateTime end, string guestName, int status, decimal? deposit, int? depositUnitId)
+        {
+            
+            return Json(null);
+        }
+    }
+}

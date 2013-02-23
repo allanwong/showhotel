@@ -1,0 +1,27 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+    @RenderSection("head", false)
+</head>
+<body>
+    <div id="content-header">
+		<h1>@ViewBag.Title</h1>
+		<div class="btn-group" style="width: auto;">
+			<a id="refreshContent" class="btn btn-large tip-bottom" data-original-title="刷新内容">
+                <i class="icon-refresh"></i>
+			</a>
+		</div>
+	</div>
+	<div id="breadcrumb">
+		<a href="@Url.Action("index", "app")" class="tip-bottom" data-original-title="回到首页">
+            <i class="icon-home"></i>
+            首页
+		</a>
+		@RenderSection("breadcrumb", false)
+	</div>
+    @RenderBody()
+    @RenderSection("bottom", false)
+</body>
+</html>

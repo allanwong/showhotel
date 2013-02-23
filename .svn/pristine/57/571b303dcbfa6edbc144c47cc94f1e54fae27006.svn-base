@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<connectionStrings>
+    <!--<add name="PettiInnEntities" providerName="System.Data.SqlClient" connectionString="Data Source=192.168.1.105;Database=PettiInn;User Id=sa;Password=aaaaaa" />-->
+    <add name="Entities" connectionString="metadata=res://*/Model1.csdl|res://*/Model1.ssdl|res://*/Model1.msl;provider=System.Data.SqlClient;provider connection string=&quot;data source=server1;initial catalog=PettiInn;user id=sa;password=aaaaaa;MultipleActiveResultSets=True;App=EntityFramework&quot;" providerName="System.Data.EntityClient" />
+</connectionStrings>

@@ -1,0 +1,34 @@
+﻿using PettiInn.Console.Web.Filters;
+using PettiInn.SOA.DTO;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Web;
+using System.Web.Mvc;
+using PettiInn.SOA.DTO.Shared;
+
+namespace PettiInn.Console.Web.Controllers
+{
+    [RequireSuperAdmin]
+    public class RolesController : ControllerBase
+    {
+        public ActionResult Index()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> List(SearchCriterias criterias)
+        {
+            var result = await this.PostAsync<IEnumerable<RoleDTO>>(this.GetAPIAddress("/api/console/Role/Roles"));
+            return Json(new
+                {
+                    aaData = result,
+                    //iTotalDisplayRecords= 3,
+                    //iTotalRecords=3,
+                    //sEcho= "3"
+                });
+        }
+    }
+}
